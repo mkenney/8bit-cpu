@@ -3,8 +3,8 @@
 28 + 14
 ```ruby
 # data is a $label plus a byte:
-$d1: 0x1C    # hex 28
-$d2: 0b1110  # bin 14
+$d1: 0x1C   # hex 28
+$d2: 0b1110 # bin 14
 
     LDA $d1 # load labeled data into register A (∑ register)
     ADD $d2 # add labeled data to register A (∑ register)
