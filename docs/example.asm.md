@@ -1,36 +1,36 @@
 # ASM
 
 28 + 14
-```js
+```ruby
+# data is a $label plus a byte:
+$d1: 0x1C    # hex 28
+$d2: 0b1110  # bin 14
 
-// data is a label plus a byte:
-$d1: 28      // dec 28
-$d2: 0b1110  // bin 14
-$label: 0xFC // hex 28
+	LDA $d1 # load labeled data into register A (∑ register)
+	ADD $d2 # add labeled data to register A (∑ register)
+	JMP run # GOTO a label
 
-	LDA $d1 // load labeled data into register A (∑ register)
-	ADD $d2 // add labeled data to register A (∑ register)
-	JMP run // GOTO a label
-
-// labels
+# labels
 run:
-	// instructions
-	LDA     28     // load 28 into register A
-	LDB     0b1110 // load 14 into register B
-	ADD,reg 1      // add register B to register A
-	OUT,reg 0      // load register A (∑ register) data into output register
+	# instructions
+	LDA     $d1 # load 28 into register A
+	LDB     $d2 # load 14 into register B
+	ADD,reg B   # add register B to register A, store result in register A
+	OUT,reg A   # load register A (∑ register) data into output register
 
 callSubroutine:
-	LDA 28
-	LDB 14
-	SUB addAndOutput
+	LDA $d1
+	LDB $d2
+	RUN addAndOutput
 
-// subroutines
-addAndOutput{
-	ADD,reg 1
-	OUT,reg 0
+	# loop
+	JMP callSubroutine
+
+# subroutines
+addAndOutput {
+	ADD,reg B
+	OUT,reg A
 }
-
 ```
 
 ## SYS

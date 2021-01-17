@@ -1,5 +1,10 @@
 # ASM
 
+## LANG
+Compiler syntax.
+* `RUN` - execute a pre-defined subroutine
+
+
 ## SYS
 System level commands.
 * `HLT` - halt clock signal
