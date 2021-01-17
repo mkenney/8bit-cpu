@@ -4,13 +4,12 @@
 Compiler syntax.
 * `RUN` - execute a pre-defined subroutine
 
-
 ## SYS
 System level commands.
 * `HLT` - halt clock signal
 * `RST` - system reset
 * `NOP` - noop, use 1 instruction cycle
-* `SLOP`- slow noop, use all instruction cycles
+* `SLOP` - slow noop, use all instruction cycles
 
 ## REG
 Data register load commands.
