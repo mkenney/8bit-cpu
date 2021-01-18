@@ -12,26 +12,27 @@ $d2: 0b1110 # bin 14
 
 # initialize registers
 reset {
-    LD,0    0       # set register A to 0b00000000
-    LD,1    0       # set register B to 0b00000000
-    LD,2    0       # set register X to 0b00000000
-    LD,3    0       # set register Y to 0b00000000
+    LD,0    0       # set register A to 0x00
+    LD,1    0       # set register X to 0x00
+    LD,2    0       # set register Y to 0x00
 
     # todo...
 }
 
 # calculate the next fibonacci number
 nextfib {
-    LDG,2   0       # copy register A (rid 0) to register X (rid 2)
-    ADDG    1       # add register A (always) + B (rid 1), store result in A (always)
-    LDG,1   2       # copy register X (rid 2) to register B (rid 1)
+    LDG,2   0       # copy register A (rid 0) to register y (rid 2)
+    ADDG    1       # add register A (always) + X (rid 1), store result in A (always)
+    LDG,1   2       # copy register Y (rid 2) to register X (rid 1)
 }
 
 # initialize
 setup:
     RUN     reset   # reset all data registers
-    LD,0    1       # set register A to 0b00000001
-    LD,2    1       # set register X to 0b00000001
+
+    LD,0    1       # set register A to 0x01
+    LD,1    1       # set register X to 0x01
+    LD,2    1       # set register y to 0x01
 
 # loop
 loop:
