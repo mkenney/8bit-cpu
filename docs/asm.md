@@ -10,63 +10,61 @@ System level commands.
 * `RST` - system reset
 * `NOP` - noop, use 1 instruction cycle
 * `SLOP` - slow noop, use all instruction cycles
+* `BUS [BYTE]` -
 
-## REG
+## LD (load)
 Data register load commands.
-* `LD[A,X,Y] [BYTE]` load BYTE into specified register
-* `LD[A,X,Y],ram [BYTE]` load data in RAM at address BYTE into specified register
-* `LD[A,X,Y],reg [BYTE]` load data in register BYTE (0=a,1=x,2=y) into specified register
-* `LD[A,X,Y],rom [BYTE]` load data in ROM at address BYTE into specified register
+* `LD,[RID] [BYTE]` load BYTE into register RID (0=a,1=x,2=y)
+* `LDG,[RID0] [RID1]` load data in register RID1 (0=a,1=x,2=y) into register RID0 (0=a,1=x,2=y)
+* `LDM,[RID] [BYTE]` load data in ROM at address BYTE into register RID (0=a,1=x,2=y)
+* `LDR,[RID] [BYTE]` load data in RAM at address BYTE into specified register
 
 ## OUT
 Update BUS_OUT data.
-* `OUT [BYTE]` send BYTE to output
-* `OUT,ram [BYTE]` send data in RAM at address BYTE to output
-* `OUT,reg [BYTE]` send data in register BYTE (0=a,1=x,2=y) to output
-* `OUT,rom [BYTE]` send data in ROM at address BYTE to output
+* `OUT [BYTE]` load BYTE into output register
+* `OUTG [RID]` load register RID (0=a,1=x,2=y) into output register
+* `OUTM [BYTE]` load ROM at address BYTE into output register
+* `OUTR [BYTE]` load RAM at address BYTE into output register
 
 ## STACK
 Push and pull from the system stack.
 
 ### PUSH
 * `PSH [BYTE]` push BYTE onto stack
-* `PSH,ram [BYTE]` push data in RAM at address BYTE onto stack
-* `PSH,reg [BYTE]` push register BYTE onto stack (0=a,1=x,2=y)
-* `PSH,rom [BYTE]` push data in ROM at address BYTE onto stack
+* `PSHG [RID]` push register RID (0=a,1=x,2=y) onto stack
+* `PSHM [BYTE]` push data in ROM at address BYTE onto stack
+* `PSHR [BYTE]` push data in RAM at address BYTE onto stack
 
 ### PULL
 * `PUL` - pull from stack, discard
-* `PUL,ram [BYTE]` pull from stack and store data in RAM at address BYTE
-* `PUL,reg [BYTE]` pull from stack and store data in register BYTE (0=a,1=x,2=y)
+* `PULG [RID]` pull from stack and store data in register BYTE (0=a,1=x,2=y)
+* `PULR [BYTE]` pull from stack and store data in RAM at address BYTE
 
-
-## RAM management
+## RAM
 Write various register or ROM/RAM data into RAM.
-* `STA [BYTE]` store data from register A in RAM at address BYTE
-* `STB [BYTE]` store data from register B in RAM at address BYTE
-* `STX [BYTE]` store data in register X in RAM at address BYTE
-* `STY [BYTE]` store data in register Y in RAM at address BYTE
-* `STM [BYTE]` store data from RAM in RAM at address BYTE
-* `STR [BYTE]` store data from ROM in RAM at address BYTE
+* `ST,[ADDR] [DATA]` store DATA in RAM at address ADDR
+* `STG,[ADDR] [RID]` store data from register RID (0=a,1=x,2=y) in RAM at address ADDR
+* `STM,[ADDR0] [ADDR1]` store data from ROM at address ADDR1 in RAM at address ADDR0
+* `STR,[ADDR0] [ADDR1]` copy data from RAM at address ADDR1 to ADDR0
 
 ## Logical Operations
 Various logical operations.
 
 ### Math
-Math operations make direct use of register A.
+_Math operations make direct use of register A._
 
 * `ADD [BYTE]` immed - add BYTE
-* `ADD,ram [BYTE]` ram - add data in RAM at address BYTE
-* `ADD,reg [BYTE]` reg - add data in register BYTE (0=a,1=x,2=y)
-* `ADD,rom [BYTE]` rom - add data in ROM at address BYTE
+* `ADDG [RID]` reg - add data in register RID (0=a,1=x,2=y)
+* `ADDM [ADDR]` rom - add data in ROM at address ADDR
+* `ADDR [ADDR]` ram - add data in RAM at address ADDR
 
 * `SUB [BYTE]` immed - subtract BYTE
-* `SUB,ram [BYTE]` ram - subtract data in RAM at address BYTE
-* `SUB,reg [BYTE]` reg - subtract data in register BYTE (0=a,1=x,2=y)
-* `SUB,rom [BYTE]` rom - subtract data in ROM at address BYTE
+* `SUBG [RID]` reg - subtract data in register RID (0=a,1=x,2=y)
+* `SUBM [ADDR]` rom - subtract data in ROM at address ADDR
+* `SUBR [ADDR]` ram - subtract data in RAM at address ADDR
 
 ### Branch
 * `JMP [BYTE]` set the program counter to BYTE
-* `JMP,ram [BYTE]` set the program counter to the data in RAM at address BYTE
-* `JMP,reg [BYTE]` set the program counter to the data in register BYTE (0=a,1=x,2=y)
-* `JMP,rom [BYTE]` set the program counter to the data in ROM at address BYTE
+* `JMPG [RID]` set the program counter to the data in register RID (0=a,1=x,2=y)
+* `JMPM [ADDR]` set the program counter to the data in ROM at address ADDR
+* `JMPR [ADDR]` set the program counter to the data in RAM at address ADDR
