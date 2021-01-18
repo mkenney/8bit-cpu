@@ -24,9 +24,9 @@ reset {
 
 # calculate the next fibonacci number
 nextfib {
-    LDG,2   0       # copy register A (rid 0) data to register X (rid 2)
+    LDG,2   0       # copy register A (rid 0) to register X (rid 2)
     ADDG    1       # add register A (always) + B (rid 1), store result in A (always)
-    LDG,1   2       # copy register X (rid 2) data to register B (rid 1)
+    LDG,1   2       # copy register X (rid 2) to register B (rid 1)
 }
 
 # initialize
@@ -37,7 +37,7 @@ setup:
 
 # loop
 loop:
-    OUTG    0       # copy register A (rid 0) data to output register
+    OUTG    0       # copy register A (rid 0) to the output register
     RUN     nextfib # call Fibonacci subroutine
     JMP     loop    # loop forever
 ```
