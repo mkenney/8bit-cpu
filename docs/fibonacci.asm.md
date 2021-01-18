@@ -1,5 +1,3 @@
-# ASM
-
 ## Fibonacci
 
 Fibonacci numbers output in an infinite loop using subroutine calls for initialization and for each calculation in iteration.
