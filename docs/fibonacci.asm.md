@@ -1,6 +1,6 @@
 ## Fibonacci
 
-Fibonacci numbers output in an infinite loop using subroutine calls for initialization and for each calculation in iteration.
+Fibonacci numbers output in an infinite loop using subroutine calls for initialization and to calculate the next number in each iteration.
 
 ```ruby
 # data is a $label plus a byte:
