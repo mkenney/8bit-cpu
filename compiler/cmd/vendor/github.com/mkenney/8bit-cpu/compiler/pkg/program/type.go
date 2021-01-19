@@ -29,7 +29,6 @@ const (
 
 var (
 	errUnknownInstruction = errors.Errorf("unknown instruction type")
-
-	errSyntaxError = errors.Errorf("invalid syntax")
-	errParseError  = errors.Errorf("unknown")
+	errSyntaxError        = errors.Errorf("invalid syntax")
+	errParseError         = errors.Errorf("unknown")
 )
