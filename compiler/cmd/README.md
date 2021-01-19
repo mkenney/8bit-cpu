@@ -1,3 +1,0 @@
-# bcc
-
-Bit code compiler
