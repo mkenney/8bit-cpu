@@ -12,31 +12,31 @@ $d2: 0b1110 # bin 14
 
 # initialize registers
 reset {
-    LD,0    0       # set register A to 0x00
-    LD,1    0       # set register X to 0x00
-    LD,2    0       # set register Y to 0x00
+    LDA 0   # set register A to 0x00
+    LDX 0   # set register X to 0x00
+    LDY 0   # set register Y to 0x00
 
     # todo...
 }
 
 # calculate the next fibonacci number
 nextfib {
-    LDG,2   0       # copy register A (rid 0) to register y (rid 2)
-    ADDG    1       # add register A (always) + X (rid 1), store result in A (always)
-    LDG,1   2       # copy register Y (rid 2) to register X (rid 1)
+    LDYA    # copy register A to register y
+    ADDX    # add register A (always) + register X, store result in A (always)
+    LDXY    # copy register Y to register X
 }
 
 # initialize
 setup:
     RUN     reset   # reset all data registers
 
-    LD,0    1       # set register A to 0x01
-    LD,1    1       # set register X to 0x01
-    LD,2    1       # set register y to 0x01
+    LDA    1       # set register A to 0x01
+    LDX    0       # set register X to 0x01
+    LDY    1       # set register y to 0x01
 
 # loop
 loop:
-    OUTG    0       # copy register A (rid 0) to the output register
-    RUN     nextfib # call Fibonacci subroutine
-    JMP     loop    # loop forever
+    OUTA    # copy register A (rid 0) to the output register
+    RUN nextfib # call Fibonacci subroutine
+    JMP loop    # loop forever
 ```
