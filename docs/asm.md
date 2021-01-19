@@ -1,70 +1,74 @@
 # ASM
 
-## LANG
-Compiler syntax.
-* `RUN` - execute a pre-defined subroutine
+## Labels
 
-## SYS
+## Subroutines
+
+## Instructions
+
+### LANG
+Compiler syntax.
+* `RUN	[string]` - execute the subroutine identified by `string`
+  * push addr onto stack
+  * run subroutine steps
+  * `}` label signifies JMP to stack value
+
+### SYS
 System level commands.
 * `HLT` - halt clock signal
 * `RST` - system reset
 * `NOP` - noop, use 1 instruction cycle
 * `SLOP` - slow noop, use all instruction cycles
-* `BUS [BYTE]` -
 
-## LD (load)
+### LD* (load)
 Data register load commands.
-* `LD,[RID] [BYTE]` load BYTE into register RID
-* `LDG,[RID0] [RID1]` load data in register RID1 into register RID0
-* `LDM,[RID] [BYTE]` load data in ROM at address BYTE into register RID
-* `LDR,[RID] [BYTE]` load data in RAM at address BYTE into specified register
 
-## OUT
-Update BUS_OUT data.
-* `OUT [BYTE]` load BYTE into output register
-* `OUTG [RID]` load register RID into output register
-* `OUTM [BYTE]` load ROM at address BYTE into output register
-* `OUTR [BYTE]` load RAM at address BYTE into output register
+#### A register
+* `LDA	[BYTE]` Load `BYTE` into register A
+* `LDA	[@const]` Load `@const` into register A
+* `LDA	[$var]` Load `$var` into register A
+* `LDAX` Load data from register X into register A
+* `LDAY` Load data from register Y into register A
 
-## STACK
-Push and pull from the system stack.
+#### X register
+* `LDX	[BYTE]` Load `BYTE` into register X
+* `LDX	[@const]` Load `@const` into register X
+* `LDX	[$var]` Load `$var` into register X
+* `LDXA` Load data from register A into register X
+* `LDXY` Load data from register Y into register X
 
-### PUSH
-* `PSH [BYTE]` push BYTE onto stack
-* `PSHG [RID]` push register RID onto stack
-* `PSHM [BYTE]` push data in ROM at address BYTE onto stack
-* `PSHR [BYTE]` push data in RAM at address BYTE onto stack
+#### Y register
+* `LDY	[BYTE]` Load `BYTE` into register Y
+* `LDY	[@const]` Load `@const` into register Y
+* `LDY	[$var]` Load `$var` into register Y
+* `LDYA` Load data from register A into register Y
+* `LDYX` Load data from register X into register Y
 
-### PULL
-* `PUL` - pull from stack, discard
-* `PULG [RID]` pull from stack and store data in register BYTE
-* `PULR [BYTE]` pull from stack and store data in RAM at address BYTE
 
-## RAM
-Write various register or ROM/RAM data into RAM.
-* `ST,[ADDR] [DATA]` store DATA in RAM at address ADDR
-* `STG,[ADDR] [RID]` store data from register RID in RAM at address ADDR
-* `STM,[ADDR0] [ADDR1]` store data from ROM at address ADDR1 in RAM at address ADDR0
-* `STR,[ADDR0] [ADDR1]` copy data from RAM at address ADDR1 to ADDR0
+### OUT register
+OUT register load commands.
+* `OUT	[BYTE]` load BYTE into output register
+* `OUT	[@const]` Load `@const` into output register
+* `OUT	[$var]` Load `$var` into output register
+* `OUTA` load register A into output register
+* `OUTX` load register X into output register
+* `OUTY` load register Y into output register
 
-## Logical Operations
+### Logical Operations
 Various logical operations.
 
-### Math
+#### Math
 _Math operations make direct use of register A._
 
-* `ADD [BYTE]` immed - add BYTE
-* `ADDG [RID]` reg - add data in register RID
-* `ADDM [ADDR]` rom - add data in ROM at address ADDR
-* `ADDR [ADDR]` ram - add data in RAM at address ADDR
+* `ADD	[BYTE]` immed - add BYTE
+* `ADDG	[RID]` reg - add data in register RID
+* `ADDM	[ADDR]` rom - add data in ROM at address ADDR
+* `ADDR	[ADDR]` ram - add data in RAM at address ADDR
 
-* `SUB [BYTE]` immed - subtract BYTE
-* `SUBG [RID]` reg - subtract data in register RID
-* `SUBM [ADDR]` rom - subtract data in ROM at address ADDR
-* `SUBR [ADDR]` ram - subtract data in RAM at address ADDR
+* `SUB	[BYTE]` immed - subtract BYTE
+* `SUBG	[RID]` reg - subtract data in register RID
+* `SUBM	[ADDR]` rom - subtract data in ROM at address ADDR
+* `SUBR	[ADDR]` ram - subtract data in RAM at address ADDR
 
-### Branch
-* `JMP [BYTE]` set the program counter to BYTE
-* `JMPG [RID]` set the program counter to the data in register RID
-* `JMPM [ADDR]` set the program counter to the data in ROM at address ADDR
-* `JMPR [ADDR]` set the program counter to the data in RAM at address ADDR
+#### Branch
+* `JMP	[string]` jump to the label identified by `string`

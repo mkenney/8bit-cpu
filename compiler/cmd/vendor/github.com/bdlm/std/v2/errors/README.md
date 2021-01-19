@@ -1,0 +1,1 @@
+The `errors` package defines interfaces for error types that manage wrapping errors with additional context or data. This allows for troubleshooting and error handling comparable to traditional exception management.
