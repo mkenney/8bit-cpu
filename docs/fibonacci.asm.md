@@ -4,8 +4,8 @@ Fibonacci numbers output in an infinite loop using subroutine calls for initiali
 
 ```ruby
 # data is a $label plus a byte:
-$d1: 0x1C   # hex 28
-$d2: 0b1110 # bin 14
+$d1 0x1C   # hex 28
+$d2 0b1110 # bin 14
 
 # subroutines are labels ending with a BRACE { and are delimited with a
 # closing BRACE }
@@ -27,7 +27,7 @@ nextfib {
 }
 
 # initialize
-setup:
+setup
     RUN     reset   # reset all data registers
 
     LDAV    1   # set register A to 0x01
@@ -35,7 +35,7 @@ setup:
     LDYV    1   # set register y to 0x01
 
 # loop
-loop:
+loop
     OUTA    # copy register A (rid 0) to the output register
     RUN nextfib # call Fibonacci subroutine
     JMP loop    # loop forever
