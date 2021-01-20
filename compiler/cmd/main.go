@@ -12,7 +12,7 @@ import (
 
 func init() {
 	log.SetFormatter(&log.TextFormatter{DisableTTY: true})
-	log.SetLevel(log.DebugLevel)
+	//log.SetLevel(log.DebugLevel)
 }
 
 func main() {
@@ -42,5 +42,5 @@ func main() {
 			code = code + "\n" + l
 		}
 	}
-	fmt.Printf("\n\n%s\n\n", code)
+	fmt.Printf("%s\n", code)
 }

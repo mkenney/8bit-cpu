@@ -85,6 +85,7 @@ func (inst *Instruction) parseConst() error {
 		return errors.Wrap(errSyntaxError, "constant error '%s'", inst.Code)
 	}
 
+	inst.Label = parts[0]
 	inst.Data, err = parseData(parts[1])
 	if nil != err {
 		return errors.Wrap(err, "error parsing constant data '%s'", inst.Code)
@@ -123,7 +124,7 @@ func (inst *Instruction) parseInstruction() error {
 			if idx, ok := jmpMap[parts[1]]; ok {
 				inst.Data = idx
 			}
-		} else {
+		} else if strings.HasPrefix(parts[1], "$") {
 			inst.Data = 0
 			if idx, ok := datMap[parts[1]]; ok {
 				inst.Data = idx

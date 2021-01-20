@@ -89,7 +89,7 @@ func (prg *Program) parse() error {
 
 			case T_CONST:
 				// Data stored on ROM.
-				datMap[prg.Instructions[idx].Code] = prg.Instructions[idx].Data
+				datMap[prg.Instructions[idx].Label] = prg.Instructions[idx].Data
 
 			case T_LABEL:
 				// Label for JMP instructions.
@@ -134,7 +134,7 @@ func (prg *Program) Compile(dest string) error {
 
 			case T_CONST:
 				// Data stored on ROM.
-				bytes = append(bytes, 0, 0)
+				bytes = append(bytes, 0, byte(inst.Data))
 
 			case T_LABEL:
 				// Label for JMP instructions.
@@ -169,8 +169,10 @@ func (prg *Program) Compile(dest string) error {
 			log.Debugf("compiled instruction %d: % -10s %02x:%02x\n", inst.Inst, `"`+strings.Trim(inst.Code, " ")+`"`, instByte, inst.Data)
 		}
 	}
+	log.Infof("compiled code size is %d bytes", len(bytes))
 
 	binSize := Kbit32 - len(bytes)
+	log.Infof("padding ROM image to %d additional bytes (%d total)", binSize, Kbit32)
 	for a := 0; a < binSize; a++ {
 		bytes = append(bytes, 0)
 	}
