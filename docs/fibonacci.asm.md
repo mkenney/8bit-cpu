@@ -30,9 +30,9 @@ nextfib {
 setup:
     RUN     reset   # reset all data registers
 
-    LDA    1       # set register A to 0x01
-    LDX    0       # set register X to 0x01
-    LDY    1       # set register y to 0x01
+    LDAV    1   # set register A to 0x01
+    LDXV    0   # set register X to 0x01
+    LDYV    1   # set register y to 0x01
 
 # loop
 loop:
