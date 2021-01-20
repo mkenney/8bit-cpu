@@ -62,7 +62,7 @@ func (prg *Program) parse() error {
 		p := strings.Split(line, "#")
 		code := strings.TrimRight(p[0], " \t")
 
-		// All whitespace must a single tab.
+		// All whitespace must a single space.
 		code = strings.ReplaceAll(code, "\t", " ")
 		for strings.Contains(code, "  ") {
 			code = strings.ReplaceAll(code, "  ", " ")
