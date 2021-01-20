@@ -15,9 +15,9 @@ $d2 0b1110 # bin 14
 
 # initialize registers
 reset {
-    LDA 0   # set register A to 0x00
-    LDX 0   # set register X to 0x00
-    LDY 0   # set register Y to 0x00
+    LDAV    0   # set register A to 0x00
+    LDXV    0   # set register X to 0x00
+    LDYV    0   # set register Y to 0x00
 
     # todo...
 }
@@ -32,14 +32,13 @@ nextfib {
 # initialize
 setup
     RUN     reset   # reset all data registers
-
-    LDAV    1   # set register A to 0x01
-    LDXV    0   # set register X to 0x01
-    LDYV    1   # set register y to 0x01
+    LDAV    1       # set register A to 0x01
+    LDXV    0       # set register X to 0x01
+    LDYV    1       # set register y to 0x01
 
 # loop
 loop
-    OUTA    # copy register A (rid 0) to the output register
+    OUTA        # copy register A (rid 0) to the output register
     RUN nextfib # call Fibonacci subroutine
     JMP loop    # loop forever
 ```
