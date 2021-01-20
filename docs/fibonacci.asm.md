@@ -10,8 +10,8 @@ $d2 0b1110 # bin 14
 # subroutines are labels ending with a BRACE { and are delimited with a
 # closing BRACE }
 #
-# `RUN <x>` should push the current PC value on the stack
-# `}` should pop a value of the stack and JMP to it
+# `RUN <x>` should push the current PC value onto the call stack
+# `}` should pop a value off the call stack and JMP to it
 
 # initialize registers
 reset {
