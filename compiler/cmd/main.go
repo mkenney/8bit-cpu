@@ -43,6 +43,4 @@ func main() {
 		}
 	}
 	fmt.Printf("\n\n%s\n\n", code)
-	//b, _ := json.MarshalIndent(prg.Code, "", "\t")
-	//fmt.Printf("\n\n%s\n\n", strings.Join(prg.Lines, "\n"))
 }
