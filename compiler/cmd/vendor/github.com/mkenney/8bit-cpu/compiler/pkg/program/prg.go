@@ -2,7 +2,6 @@ package program
 
 import (
 	"encoding/binary"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -20,10 +19,11 @@ type Program struct {
 	inSub      bool   //
 	curSub     string //
 
-	datMap map[string]int // data map of $const => index
-	jmpMap map[string]int // label map of label => index
-	subMap map[string]int // subroutine map of subroutine{ => index
 }
+
+var datMap map[string]int // data map of $const => index
+var jmpMap map[string]int // label map of label => index
+var subMap map[string]int // subroutine map of subroutine{ => index
 
 // New
 func New(sourceFile string) (*Program, error) {
@@ -32,11 +32,11 @@ func New(sourceFile string) (*Program, error) {
 		Code:         map[int]string{},
 		Instructions: map[int]*Instruction{},
 		sourceFile:   sourceFile,
-
-		datMap: map[string]int{},
-		jmpMap: map[string]int{},
-		subMap: map[string]int{},
 	}
+
+	datMap = map[string]int{}
+	jmpMap = map[string]int{}
+	subMap = map[string]int{}
 
 	if err := prg.parse(); nil != err {
 		return nil, errors.Wrap(err, "parse error")
@@ -50,7 +50,7 @@ func (prg *Program) parse() error {
 	// Read source file.
 	bytes, err := ioutil.ReadFile(prg.sourceFile)
 	if nil != err {
-		log.WithError(err).Error(err)
+		return errors.Wrap(err, "could not read source file '%s'", prg.sourceFile)
 	}
 
 	// Split source file into lines
@@ -78,6 +78,7 @@ func (prg *Program) parse() error {
 			}
 
 			//
+			prg.Instructions[idx].Idx = idx
 			prg.Instructions[idx].Line = idx + 1
 			prg.Instructions[idx].Inst = len(prg.Instructions) - 1
 
@@ -88,11 +89,11 @@ func (prg *Program) parse() error {
 
 			case T_CONST:
 				// Data stored on ROM.
-				prg.datMap[prg.Instructions[idx].Code] = idx
+				datMap[prg.Instructions[idx].Code] = prg.Instructions[idx].Data
 
 			case T_LABEL:
 				// Label for JMP instructions.
-				prg.jmpMap[prg.Instructions[idx].Code] = idx
+				jmpMap[prg.Instructions[idx].Label] = idx
 
 			case T_INSTR:
 				// Instruction.
@@ -101,7 +102,7 @@ func (prg *Program) parse() error {
 				// Subroutine.
 				prg.inSub = true
 				prg.curSub = prg.Instructions[idx].Label
-				prg.subMap[prg.Instructions[idx].Label] = idx
+				subMap[prg.Instructions[idx].Label] = idx
 
 			case T_SUBEND:
 				// Subroutine end.
@@ -114,19 +115,58 @@ func (prg *Program) parse() error {
 	return nil
 }
 
-func (prg *Program) Compile() error {
-	fmt.Printf("\n\n\n")
+func (prg *Program) Compile(dest string) error {
+	var err error
 
-	outf, err := os.Create("bcc.bin")
+	outf, err := os.Create(dest)
 	if nil != err {
-		log.WithError(err).Fatal(err)
+		return errors.Wrap(err, "could not create data file '%s'", dest)
 	}
 	defer outf.Close()
 
 	bytes := []byte{}
 	for k := range prg.Lines {
 		if inst, ok := prg.Instructions[k]; ok {
-			bytes = append(bytes, byte(inst.Inst), byte(inst.Data))
+			var instByte byte
+			switch inst.Type {
+			default:
+				return errors.Wrap(errUnknownInstruction, "instruction type '%s'", inst.Type)
+
+			case T_CONST:
+				// Data stored on ROM.
+				bytes = append(bytes, 0, 0)
+
+			case T_LABEL:
+				// Label for JMP instructions.
+				instByte, err = opCode("LABEL")
+				bytes = append(bytes, instByte, byte(inst.Data))
+
+			case T_INSTR:
+				// Instruction.
+				instByte, err = opCode(inst.Label)
+				if nil != err {
+					log.WithError(err).Debug(err)
+				}
+				bytes = append(bytes, instByte, byte(inst.Data))
+				log.WithFields(log.Fields{
+					"inst":   inst.Label,
+					"data":   inst.Data,
+					"opcode": instByte,
+				}).Debug("instruction data byte")
+
+			case T_SUB:
+				// Subroutine.
+				bytes = append(bytes, 0, 0)
+
+			case T_SUBEND:
+				// Subroutine end.
+				bytes = append(bytes, 0, 0)
+			}
+			if nil != err {
+				return err
+			}
+
+			log.Debugf("compiled instruction %d: % -10s %02x:%02x\n", inst.Inst, `"`+strings.Trim(inst.Code, " ")+`"`, instByte, inst.Data)
 		}
 	}
 
@@ -137,25 +177,8 @@ func (prg *Program) Compile() error {
 
 	err = binary.Write(outf, binary.BigEndian, bytes)
 	if nil != err {
-		log.WithError(err).Fatal(err)
+		return errors.Wrap(err, "could not write binary data to '%s'", dest)
 	}
-
-	cnt := 0
-	for a, b := range bytes {
-		if a > len(prg.Instructions)*2 {
-			break
-		}
-		if 0 == a%15 {
-			cnt = 0
-			fmt.Printf("\n% 8x", a)
-		}
-		if 0 == cnt%8 {
-			fmt.Printf(":  ")
-		}
-		fmt.Printf("%02x ", b)
-		cnt++
-	}
-	fmt.Printf("\n\n\n")
 
 	return nil
 }

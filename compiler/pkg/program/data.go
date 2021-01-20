@@ -4,12 +4,16 @@ import "github.com/bdlm/errors/v2"
 
 // bitMap
 var bitMap []string = []string{
+
 	// system
 	"HLT",  // Halt system clock signal
 	"RST",  // Reset all system registers
 	"RUN",  // Execute a subroutine
 	"NOP",  // No-op, use 1 instruction cycle
 	"SLOP", // Slow no-op, use 16 instruction cycles
+
+	// internal
+	"LABEL", //
 
 	// math
 	"ADDV", //

@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/bdlm/errors/v2"
-	"github.com/bdlm/log/v2"
 )
 
 // Instruction
@@ -81,7 +80,7 @@ func (inst *Instruction) generateOpcodes() error {
 func (inst *Instruction) parseConst() error {
 	var err error
 
-	parts := strings.Split(inst.Code, "\t")
+	parts := strings.Split(inst.Code, " ")
 	if 2 != len(parts) {
 		return errors.Wrap(errSyntaxError, "constant error '%s'", inst.Code)
 	}
@@ -96,7 +95,7 @@ func (inst *Instruction) parseConst() error {
 
 // parseLabel
 func (inst *Instruction) parseLabel() error {
-	parts := strings.Split(inst.Code, "\t")
+	parts := strings.Split(inst.Code, " ")
 	if 1 != len(parts) {
 		return errors.Wrap(errSyntaxError, "invalid label format '%s'", inst.Code)
 	}
@@ -108,15 +107,31 @@ func (inst *Instruction) parseLabel() error {
 // parseInstruction
 func (inst *Instruction) parseInstruction() error {
 	var err error
-	parts := strings.Split(strings.Trim(inst.Code, " \t"), "\t")
+	parts := strings.Split(strings.Trim(inst.Code, " "), " ")
 	if 1 > len(parts) {
 		return errors.Wrap(errSyntaxError, "invalid instruction format '%s'", inst.Code)
 	}
 	inst.Label = parts[0]
 	if 2 == len(parts) {
-		inst.Data, err = parseData(parts[1])
+		if "RUN" == inst.Label {
+			inst.Data = 0
+			if idx, ok := subMap[parts[1]]; ok {
+				inst.Data = idx
+			}
+		} else if "JMP" == inst.Label {
+			inst.Data = 0
+			if idx, ok := jmpMap[parts[1]]; ok {
+				inst.Data = idx
+			}
+		} else {
+			inst.Data = 0
+			if idx, ok := datMap[parts[1]]; ok {
+				inst.Data = idx
+			}
+		}
+
 		if nil != err {
-			log.WithError(errors.Wrap(err, "error parsing instruction data '%s'", inst.Code)).Warn("non-numeric instruction data")
+			return errors.Wrap(err, "error parsing instruction '%s'", inst.Code)
 		}
 	}
 
@@ -126,7 +141,7 @@ func (inst *Instruction) parseInstruction() error {
 // parseSubroutine
 func (inst *Instruction) parseSubroutine() error {
 	name := strings.TrimRight(inst.Code, "{")
-	if 1 != len(strings.Split(name, "\t")) {
+	if 1 != len(strings.Split(name, " ")) {
 		return errors.Wrap(errSyntaxError, "invalid subroutine format '%s'", inst.Code)
 	}
 	inst.Label = name
@@ -136,7 +151,7 @@ func (inst *Instruction) parseSubroutine() error {
 
 // endSubroutine
 func (inst *Instruction) endSubroutine() error {
-	parts := strings.Split(inst.Code, "\t")
+	parts := strings.Split(inst.Code, " ")
 	if "}" != parts[0] {
 		return errors.Wrap(errSyntaxError, "invalid subroutine return statement '%s'", inst.Code)
 	}
@@ -153,7 +168,7 @@ func (inst *Instruction) parseType() error {
 		return errors.Wrap(errParseError, "unexpected instruction '%s'", inst.Code)
 
 	// Instructions
-	case strings.HasPrefix(inst.Code, "\t"):
+	case strings.HasPrefix(inst.Code, " "):
 		inst.Type = T_INSTR
 
 	// Data
@@ -169,7 +184,7 @@ func (inst *Instruction) parseType() error {
 		inst.Type = T_SUBEND
 
 	// Jump label
-	case !strings.ContainsAny(inst.Code, "\t") && "" != inst.Code:
+	case !strings.ContainsAny(inst.Code, " ") && "" != inst.Code:
 		inst.Type = T_LABEL
 	}
 

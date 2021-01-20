@@ -10,13 +10,9 @@ github.com/bdlm/std/v2/logger
 # github.com/mkenney/8bit-cpu/compiler/pkg v0.0.0-20210118233019-84f1ef6c4e3b => ../pkg
 ## explicit
 github.com/mkenney/8bit-cpu/compiler/pkg/program
-# golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
+# golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
 golang.org/x/crypto/ssh/terminal
-# golang.org/x/sys v0.0.0-20210113181707-4bcb84eeeb78
-golang.org/x/sys/internal/unsafeheader
-golang.org/x/sys/plan9
+# golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/term v0.0.0-20201210144234-2321bbc49cbf
-golang.org/x/term
 # github.com/mkenney/8bit-cpu/compiler/pkg => ../pkg

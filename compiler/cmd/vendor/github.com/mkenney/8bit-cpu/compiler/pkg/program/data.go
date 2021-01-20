@@ -4,40 +4,44 @@ import "github.com/bdlm/errors/v2"
 
 // bitMap
 var bitMap []string = []string{
+
 	// system
-	"HLT",
-	"RST",
-	"RUN",
-	"NOP",
-	"SLOP",
+	"HLT",  // Halt system clock signal
+	"RST",  // Reset all system registers
+	"RUN",  // Execute a subroutine
+	"NOP",  // No-op, use 1 instruction cycle
+	"SLOP", // Slow no-op, use 16 instruction cycles
+
+	// internal
+	"LABEL", //
 
 	// math
-	"ADDV",
-	"ADDX",
-	"ADDY",
-	"SUB",
-	"SUBX",
-	"SUBY",
+	"ADDV", //
+	"ADDX", //
+	"ADDY", //
+	"SUBV", //
+	"SUBX", //
+	"SUBY", //
 
 	// branch
-	"JMP",
+	"JMP", //
 
 	// data
-	"LDAV",
-	"LDAX",
-	"LDAY",
-	"LDXV",
-	"LDXA",
-	"LDXY",
-	"LDYV",
-	"LDYA",
-	"LDYX",
+	"LDAV", //
+	"LDAX", //
+	"LDAY", //
+	"LDXV", //
+	"LDXA", //
+	"LDXY", //
+	"LDYV", //
+	"LDYA", //
+	"LDYX", //
 
 	// output
-	"OUTV",
-	"OUTA",
-	"OUTX",
-	"OUTY",
+	"OUTV", // Send a value to the output register
+	"OUTA", // Send the A register to the output register
+	"OUTX", // Send the X register to the output register
+	"OUTY", // Send the Y register to the output register
 }
 
 // opCode

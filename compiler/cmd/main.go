@@ -2,7 +2,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 
@@ -18,21 +17,32 @@ func init() {
 
 func main() {
 	var err error
+	logger := log.WithField("src", os.Args[1])
 
-	log.Debug("initializing program")
+	logger.Info("parsing...")
 	prg, err := program.New(os.Args[1])
 	if nil != err {
-		log.WithError(err).Fatal("failed to initialize program parser")
+		logger.WithError(err).
+			Fatal("failed to parse source file")
 	}
 
-	log.Debug("compiling...")
-	err = prg.Compile()
+	dest := os.Args[1] + ".bin"
+	logger = logger.WithField("dest", dest)
+	logger.Info("compiling...")
+	err = prg.Compile(dest)
 	if nil != err {
-		log.WithError(err).Fatal("failed to compile binary")
+		logger.WithError(err).
+			Fatal("failed to compile binary")
 	}
+	logger.Info("success")
 
-	b, _ := json.MarshalIndent(prg.Code, "", "\t")
-	fmt.Println(string(b))
-
-	log.WithField("tokens", string(b)).Info("success")
+	code := ""
+	for a := range prg.Lines {
+		if l, ok := prg.Code[a]; ok {
+			code = code + "\n" + l
+		}
+	}
+	fmt.Printf("\n\n%s\n\n", code)
+	//b, _ := json.MarshalIndent(prg.Code, "", "\t")
+	//fmt.Printf("\n\n%s\n\n", strings.Join(prg.Lines, "\n"))
 }
