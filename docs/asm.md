@@ -1,8 +1,38 @@
 # ASM
 
 ## Labels
+Labels are words that begin at column 1 and signify a location that can be used as a `JMP` target.
 
 ## Subroutines
+Subroutines are labels ending with an opening brace (`{`) character and is used as a `JMP` target when compiling `RUN` instructions. An instruction like `RUN nextfib` will push the current program position onto the system call stack and jump to the location indicated by the label `nextfib {`.
+
+When the subroutine-end token `}` is encountered, the program position is pulled off the call stack and used as a `JMP` target, resuming the previous program.
+
+```ruby
+# calculate the next fibonacci number
+nextfib {
+    LDYA    # copy register A to register y
+    ADDX    # add register A (always) + register X, store result in A (always)
+    LDXY    # copy register Y to register X
+}
+```
+
+However, `JMP nextfib` is a compile-time error.
+
+## Constants
+
+Constants are labels that begin with the special character `$` and define values that are used during compilation. Values can be defined using binary, decimal, and hexidecimal notation:
+
+```ruby
+# data is a $label plus a byte:
+$d1 0x1C   # hex 28
+$d2 0b1110 # bin 14
+
+    LDAV    $d1 # set register A to 28
+    LDXV    $d2 # set register X to 14
+    ADDX        # add register A (always) + register X, store result in register A (always)
+    OUTA        # copy register A to the output register
+```
 
 ## Instructions
 
@@ -14,7 +44,7 @@ Compiler syntax.
   * `}` label signifies JMP to stack value
 
 ### SYS
-System level commands.
+System level instructions.
 * `HLT` - halt clock signal
 * `RST` - system reset
 * `NOP` - noop, use 1 instruction cycle
@@ -42,7 +72,7 @@ _Math operations make direct use of register A._
 * `JMPS` - Load the last stack value into the program counter
 
 ### LD* (load)
-Data register load commands.
+Data register load instructions.
 
 #### A register
 * `LDAV [value]` - Load a $const or literal value into register A
@@ -79,7 +109,7 @@ Data register load commands.
 * `POPP` - Pop a stack value into the program counter
 
 ### OUT register
-OUT register load commands.
+OUT register load instructions.
 
 * `OUTV` - Send a value to the output register
 * `OUTA` - Send the A register to the output register
