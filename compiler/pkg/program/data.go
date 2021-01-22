@@ -46,13 +46,12 @@ var bitMap []string = []string{
 	"PSHA", // Push register A onto the stack
 	"PSHX", // Push register X onto the stack
 	"PSHY", // Push register Y onto the stack
-
 	"PSHP", // Push the current program counter onto the stack
-	"POPP", // Pull the last value from the stack into the program counter
 
-	"PULA", // Pull a stack value into register A
-	"PULX", // Pull a stack value into register X
-	"PULY", // Pull a stack value into register Y
+	"POPA", // Pop a stack value into register A
+	"POPX", // Pop a stack value into register X
+	"POPY", // Pop a stack value into register Y
+	"POPP", // Pop the last value from the stack into the program counter
 
 	// output
 	"OUTV", // Send a value to the output register
