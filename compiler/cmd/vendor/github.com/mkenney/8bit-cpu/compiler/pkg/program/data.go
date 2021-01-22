@@ -8,41 +8,41 @@ var bitMap []string = []string{
 	// system
 	"HLT",  // Halt system clock signal
 	"RST",  // Reset all system registers
-	"RUN",  // Execute a subroutine
+	"RUN",  // Execute a subroutine. Is encoded as a JMPV instruction
 	"NOP",  // No-op, use 1 instruction cycle
 	"SLOP", // Slow no-op, use 16 instruction cycles
 
 	// math
-	"ADDV", //
-	"ADDX", //
-	"ADDY", //
-	"SUBV", //
-	"SUBX", //
-	"SUBY", //
+	"ADDV", // Add a $const or literal to register A
+	"ADDX", // Add register X to register A
+	"ADDY", // Add register Y to register A
+	"SUBV", // Subtract a $const or literal from register A
+	"SUBX", // Subtract register X from register A
+	"SUBY", // Subtract register Y from register A
 
 	// branch
-	"JMP",  // Load a label index into the program counter
-	"JMPV", // Load a value into the program counter
-	"JMPA", // Load register A into the program counter
-	"JMPX", // Load register X into the program counter
-	"JMPY", // Load register Y into the program counter
-	"JMPS", // Load the last stack value into the program counter
+	"JMP",  // `JMP [label]`  - Jump to [label]:       Load a label index into the program counter
+	"JMPV", // `JMPV [value]` - Jump to [value]:       Load a $const or literal value into the program counter
+	"JMPA", // `JMPA`         - Jump to register A:    Load register A into the program counter
+	"JMPX", // `JMPX`         - Jump to register X:    Load register X into the program counter
+	"JMPY", // `JMPY`         - Jump to register Y:    Load register Y into the program counter
+	"JMPS", // `JMPS`         - Jump to stack pointer: Load the last stack value into the program counter
 
 	// data
-	"LDAV", // Load a value into register A
+	"LDAV", // Load a $const or literal value into register A
 	"LDAX", // Load register X into register A
 	"LDAY", // Load register Y into register A
 
-	"LDXV", // Load a value into register X
+	"LDXV", // Load a $const or literal value into register X
 	"LDXA", // Load register A into register X
 	"LDXY", // Load register Y into register X
 
-	"LDYV", // Load a value into register Y
+	"LDYV", // Load a $const or literal value into register Y
 	"LDYA", // Load register A into register Y
 	"LDYX", // Load register X into register Y
 
 	// stack
-	"PSHV", // Push a value onto the stack
+	"PSHV", // Push a $const or literal value onto the stack
 	"PSHA", // Push register A onto the stack
 	"PSHX", // Push register X onto the stack
 	"PSHY", // Push register Y onto the stack

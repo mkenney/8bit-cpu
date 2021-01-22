@@ -36,7 +36,7 @@ add
     ADDV $d2 # add 14 to the value in register A and store the result in register A
     OUTA     # load register A data into the output register
 
-# loop. this label is required, it is referenced in code below.
+# this label is required, it is referenced in code below to create a loop
 loop
     OUTA        # copy register A (rid 0) to the output register
     RUN nextfib # call Fibonacci subroutine
