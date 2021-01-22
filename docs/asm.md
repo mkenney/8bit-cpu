@@ -20,55 +20,68 @@ System level commands.
 * `NOP` - noop, use 1 instruction cycle
 * `SLOP` - slow noop, use all instruction cycles
 
-### LD* (load)
-Data register load commands.
-
-#### A register
-* `LDA	[BYTE]` Load `BYTE` into register A
-* `LDA	[@const]` Load `@const` into register A
-* `LDA	[$var]` Load `$var` into register A
-* `LDAX` Load data from register X into register A
-* `LDAY` Load data from register Y into register A
-
-#### X register
-* `LDX	[BYTE]` Load `BYTE` into register X
-* `LDX	[@const]` Load `@const` into register X
-* `LDX	[$var]` Load `$var` into register X
-* `LDXA` Load data from register A into register X
-* `LDXY` Load data from register Y into register X
-
-#### Y register
-* `LDY	[BYTE]` Load `BYTE` into register Y
-* `LDY	[@const]` Load `@const` into register Y
-* `LDY	[$var]` Load `$var` into register Y
-* `LDYA` Load data from register A into register Y
-* `LDYX` Load data from register X into register Y
-
-
-### OUT register
-OUT register load commands.
-* `OUT	[BYTE]` load BYTE into output register
-* `OUT	[@const]` Load `@const` into output register
-* `OUT	[$var]` Load `$var` into output register
-* `OUTA` load register A into output register
-* `OUTX` load register X into output register
-* `OUTY` load register Y into output register
-
 ### Logical Operations
 Various logical operations.
 
 #### Math
 _Math operations make direct use of register A._
 
-* `ADD	[BYTE]` immed - add BYTE
-* `ADDG	[RID]` reg - add data in register RID
-* `ADDM	[ADDR]` rom - add data in ROM at address ADDR
-* `ADDR	[ADDR]` ram - add data in RAM at address ADDR
-
-* `SUB	[BYTE]` immed - subtract BYTE
-* `SUBG	[RID]` reg - subtract data in register RID
-* `SUBM	[ADDR]` rom - subtract data in ROM at address ADDR
-* `SUBR	[ADDR]` ram - subtract data in RAM at address ADDR
+* `ADDV [value]` -  Add a $const or literal to register A
+* `ADDX` -  Add register X to register A
+* `ADDY` -  Add register Y to register A
+* `SUBV [value]` -  Subtract a $const or literal from register A
+* `SUBX` -  Subtract register X from register A
+* `SUBY` -  Subtract register Y from register A
 
 #### Branch
-* `JMP	[string]` jump to the label identified by `string`
+* `JMP  [string]` - Load a label index into the program counter
+* `JMPV [value]` - Load a $const or literal value into the program counter
+* `JMPA` - Load register A into the program counter
+* `JMPX` - Load register X into the program counter
+* `JMPY` - Load register Y into the program counter
+* `JMPS` - Load the last stack value into the program counter
+
+### LD* (load)
+Data register load commands.
+
+#### A register
+* `LDAV [value]` - Load a $const or literal value into register A
+* `LDAX` - Load register X into register A
+* `LDAY` - Load register Y into register A
+
+#### X register
+* `LDXV [value]` - Load a $const or literal value into register X
+* `LDXA` - Load register A into register X
+* `LDXY` - Load register Y into register X
+
+#### Y register
+ `LDYV` - Load a $const or literal value into register Y
+ `LDYA` - Load register A into register Y
+ `LDYX` - Load register X into register Y
+
+### Stack operations
+
+#### Push operations
+* `PSHV` - Push a $const or literal value onto the stack
+* `PSHA` - Push register A onto the stack
+* `PSHX` - Push register X onto the stack
+* `PSHY` - Push register Y onto the stack
+
+##### Call stack convenience method
+* `PSHP` - Push the current program counter onto the stack
+
+#### Pop operations
+* `POPA` - Pop a stack value into register A
+* `POPX` - Pop a stack value into register X
+* `POPY` - Pop a stack value into register Y
+
+##### Call stack convenience method
+* `POPP` - Pop a stack value into the program counter
+
+### OUT register
+OUT register load commands.
+
+* `OUTV` - Send a value to the output register
+* `OUTA` - Send the A register to the output register
+* `OUTX` - Send the X register to the output register
+* `OUTY` - Send the Y register to the output register
