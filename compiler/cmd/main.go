@@ -26,7 +26,7 @@ func main() {
 			Fatal("failed to parse source file")
 	}
 
-	dest := os.Args[1] + ".bin"
+	dest := os.Args[1] + ".img"
 	logger = logger.WithField("dest", dest)
 	logger.Info("compiling...")
 	err = prg.Compile(dest)
