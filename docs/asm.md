@@ -4,7 +4,7 @@
 Labels are words that begin at column 1 and signify a location that can be used as a `JMP` target.
 
 ## Subroutines
-Subroutines are labels ending with an opening brace (`{`) character and is used as a `JMP` target when compiling `RUN` instructions. An instruction like `RUN nextfib` will push the current program position onto the system call stack and jump to the location indicated by the label `nextfib {`.
+Subroutines are labels ending with an opening brace (`{`) character and is used internally as a `JMP` target when compiling `RUN` instructions. An instruction like `RUN nextfib` will push the current program position onto the system call stack and jump to the location indicated by the label `nextfib {`.
 
 When the subroutine-end token `}` is encountered, the program position is pulled off the call stack and used as a `JMP` target, resuming the previous program.
 
@@ -17,7 +17,7 @@ nextfib {
 }
 ```
 
-However, `JMP nextfib` is a compile-time error.
+However, subroutines are not valid `JMP` targets so `JMP nextfib` is a compile-time error.
 
 ## Constants
 
