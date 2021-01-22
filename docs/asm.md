@@ -1,5 +1,7 @@
 # ASM
 
+[Example script](example.asm.md)
+
 ## Labels
 Labels are words that begin at column 1 and signify a location that can be used as a `JMP` target.
 
