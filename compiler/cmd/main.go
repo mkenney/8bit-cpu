@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	log.SetFormatter(&log.TextFormatter{DisableTTY: true})
+	//log.SetFormatter(&log.TextFormatter{DisableTTY: true})
 	//log.SetLevel(log.DebugLevel)
 }
 

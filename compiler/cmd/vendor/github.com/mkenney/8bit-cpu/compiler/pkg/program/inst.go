@@ -10,9 +10,9 @@ import (
 // Instruction
 type Instruction struct {
 	Code  string // Line from source file
-	Data  int
-	Idx   int // Source file index
-	Line  int // Line number from source file
+	Data  int    // Data portion of the instruction code
+	Idx   int    // Source file index
+	Line  int    // Line number from source file
 	Label string
 
 	Inst    int    // Instruction address in compiled source
@@ -23,8 +23,12 @@ type Instruction struct {
 }
 
 // newInstruction
-func newInstruction(code string) (*Instruction, error) {
-	inst := &Instruction{Code: code}
+func newInstruction(code string, idx int) (*Instruction, error) {
+	inst := &Instruction{
+		Code: code,
+		Idx:  idx,
+		Line: idx + 1,
+	}
 
 	if err := inst.parse(); nil != err {
 		return nil, err
@@ -38,7 +42,7 @@ func (inst *Instruction) parse() error {
 	var err error
 
 	// instruction type
-	err = inst.parseType()
+	inst.Type, err = inst.parseType()
 	if nil != err {
 		return errors.Wrap(err, "failure identifying instruction type")
 	}
@@ -46,7 +50,7 @@ func (inst *Instruction) parse() error {
 	// parse instruction
 	switch inst.Type {
 	default:
-		err = errors.Wrap(errUnknownInstruction, "instruction '%s'", inst.Type)
+		err = errors.Wrap(errUnknownInstruction, "instruction '%s' at line %d", inst.Type, inst.Line)
 	case T_CONST:
 		err = inst.parseConst()
 	case T_LABEL:
@@ -59,13 +63,13 @@ func (inst *Instruction) parse() error {
 		err = inst.endSubroutine()
 	}
 	if nil != err {
-		return errors.Wrap(err, "failure parsing instruction type '%s'", inst.Code)
+		return errors.Wrap(err, "failure parsing instruction type '%s' at line %d", inst.Code, inst.Line)
 	}
 
 	// generate opcodes
 	err = inst.generateOpcodes()
 	if nil != err {
-		return errors.Wrap(err, "failure while generating opcodes for instruction '%s'", inst.Code)
+		return errors.Wrap(err, "failure while generating opcodes for instruction '%s' at line %d", inst.Code, inst.Line)
 	}
 
 	return nil
@@ -82,13 +86,13 @@ func (inst *Instruction) parseConst() error {
 
 	parts := strings.Split(inst.Code, " ")
 	if 2 != len(parts) {
-		return errors.Wrap(errSyntaxError, "constant error '%s'", inst.Code)
+		return errors.Wrap(errSyntaxError, "constant error '%s' at line %d", inst.Code, inst.Line)
 	}
 
 	inst.Label = parts[0]
 	inst.Data, err = parseData(parts[1])
 	if nil != err {
-		return errors.Wrap(err, "error parsing constant data '%s'", inst.Code)
+		return errors.Wrap(err, "error parsing constant data '%s' at line %d", inst.Code, inst.Line)
 	}
 
 	return nil
@@ -98,7 +102,7 @@ func (inst *Instruction) parseConst() error {
 func (inst *Instruction) parseLabel() error {
 	parts := strings.Split(inst.Code, " ")
 	if 1 != len(parts) {
-		return errors.Wrap(errSyntaxError, "invalid label format '%s'", inst.Code)
+		return errors.Wrap(errSyntaxError, "invalid label format '%s' at line %d", inst.Code, inst.Line)
 	}
 	inst.Label = parts[0]
 	inst.Data = 0
@@ -106,33 +110,48 @@ func (inst *Instruction) parseLabel() error {
 }
 
 // parseInstruction
+// Instructions consist of ` [instruction word] [instruction data]`
+// Note, instructions begin with a non-zero ammount of whitespace.
+// Not all instructions accept data:
+//	* JMP: accepts a label name indexing a position in the program to jump to
+//	* RUN: accepts a subroutine name indexing subroutine instructions
+//	* LDAV, LDXV, LDYV, ADDV, SUBV, OUTV: accepts a $const data byte
+//
+//		* 42
+//		* 0x66
+//		* 0b00101010
 func (inst *Instruction) parseInstruction() error {
-	var err error
 	parts := strings.Split(strings.Trim(inst.Code, " "), " ")
-	if 1 > len(parts) {
-		return errors.Wrap(errSyntaxError, "invalid instruction format '%s'", inst.Code)
+	if 0 == len(parts) || 2 < len(parts) {
+		return errors.Wrap(errSyntaxError, "invalid instruction format '%s' at line %d", inst.Code, inst.Line)
 	}
 	inst.Label = parts[0]
+
+	inst.Data = 0
 	if 2 == len(parts) {
-		if "RUN" == inst.Label {
-			inst.Data = 0
+		switch inst.Label {
+		default:
+			if data, ok := datMap[parts[1]]; ok {
+				inst.Data = data
+			} else if byt, err := parseData(parts[1]); nil != err {
+				return errors.Wrap(err, "unknown data reference '%s' at line %d", parts[1], inst.Line)
+			} else {
+				inst.Data = byt
+			}
+
+		case "RUN":
 			if idx, ok := subMap[parts[1]]; ok {
 				inst.Data = idx
+			} else {
+				return errors.Wrap(errCompileError, "unknown subroutine reference '%s' at line %d", parts[1], inst.Line)
 			}
-		} else if "JMP" == inst.Label {
-			inst.Data = 0
+
+		case "JMP":
 			if idx, ok := jmpMap[parts[1]]; ok {
 				inst.Data = idx
+			} else {
+				return errors.Wrap(errCompileError, "unknown label reference '%s' at line %d", parts[1], inst.Line)
 			}
-		} else if strings.HasPrefix(parts[1], "$") {
-			inst.Data = 0
-			if idx, ok := datMap[parts[1]]; ok {
-				inst.Data = idx
-			}
-		}
-
-		if nil != err {
-			return errors.Wrap(err, "error parsing instruction '%s'", inst.Code)
 		}
 	}
 
@@ -143,7 +162,7 @@ func (inst *Instruction) parseInstruction() error {
 func (inst *Instruction) parseSubroutine() error {
 	name := strings.TrimRight(inst.Code, "{")
 	if 1 != len(strings.Split(name, " ")) {
-		return errors.Wrap(errSyntaxError, "invalid subroutine format '%s'", inst.Code)
+		return errors.Wrap(errSyntaxError, "invalid subroutine format '%s' at line %d", inst.Code, inst.Line)
 	}
 	inst.Label = name
 
@@ -154,7 +173,7 @@ func (inst *Instruction) parseSubroutine() error {
 func (inst *Instruction) endSubroutine() error {
 	parts := strings.Split(inst.Code, " ")
 	if "}" != parts[0] {
-		return errors.Wrap(errSyntaxError, "invalid subroutine return statement '%s'", inst.Code)
+		return errors.Wrap(errSyntaxError, "invalid subroutine return statement '%s' at line %d", inst.Code, inst.Line)
 	}
 	inst.Label = parts[0]
 
@@ -162,34 +181,36 @@ func (inst *Instruction) endSubroutine() error {
 }
 
 // parseType
-func (inst *Instruction) parseType() error {
+func (inst *Instruction) parseType() (instructionType, error) {
+	var typ instructionType = T_UNK
+
 	switch true {
 	// Unknown instruction syntax, fail
 	default:
-		return errors.Wrap(errParseError, "unexpected instruction '%s'", inst.Code)
+		return typ, errors.Wrap(errParseError, "unexpected instruction '%s' at line %d", inst.Code, inst.Line)
 
 	// Instructions
 	case strings.HasPrefix(inst.Code, " "):
-		inst.Type = T_INSTR
+		typ = T_INSTR
 
 	// Data
 	case strings.HasPrefix(inst.Code, "$"):
-		inst.Type = T_CONST
+		typ = T_CONST
 
 	// Subroutine
 	case strings.HasSuffix(inst.Code, "{"):
-		inst.Type = T_SUB
+		typ = T_SUB
 
 	// Subroutine-end
 	case "}" == inst.Code:
-		inst.Type = T_SUBEND
+		typ = T_SUBEND
 
 	// Jump label
 	case !strings.ContainsAny(inst.Code, " ") && "" != inst.Code:
-		inst.Type = T_LABEL
+		typ = T_LABEL
 	}
 
-	return nil
+	return typ, nil
 }
 
 // parseData

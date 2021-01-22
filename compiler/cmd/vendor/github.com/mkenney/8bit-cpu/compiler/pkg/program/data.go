@@ -12,9 +12,6 @@ var bitMap []string = []string{
 	"NOP",  // No-op, use 1 instruction cycle
 	"SLOP", // Slow no-op, use 16 instruction cycles
 
-	// internal
-	"LABEL", //
-
 	// math
 	"ADDV", //
 	"ADDX", //
@@ -24,18 +21,38 @@ var bitMap []string = []string{
 	"SUBY", //
 
 	// branch
-	"JMP", //
+	"JMP",  // Load a label index into the program counter
+	"JMPV", // Load a value into the program counter
+	"JMPA", // Load register A into the program counter
+	"JMPX", // Load register X into the program counter
+	"JMPY", // Load register Y into the program counter
+	"JMPS", // Load the last stack value into the program counter
 
 	// data
-	"LDAV", //
-	"LDAX", //
-	"LDAY", //
-	"LDXV", //
-	"LDXA", //
-	"LDXY", //
-	"LDYV", //
-	"LDYA", //
-	"LDYX", //
+	"LDAV", // Load a value into register A
+	"LDAX", // Load register X into register A
+	"LDAY", // Load register Y into register A
+
+	"LDXV", // Load a value into register X
+	"LDXA", // Load register A into register X
+	"LDXY", // Load register Y into register X
+
+	"LDYV", // Load a value into register Y
+	"LDYA", // Load register A into register Y
+	"LDYX", // Load register X into register Y
+
+	// stack
+	"PSHV", // Push a value onto the stack
+	"PSHA", // Push register A onto the stack
+	"PSHX", // Push register X onto the stack
+	"PSHY", // Push register Y onto the stack
+
+	"PSHP", // Push the current program counter onto the stack
+	"POPP", // Pull the last value from the stack into the program counter
+
+	"PULA", // Pull a stack value into register A
+	"PULX", // Pull a stack value into register X
+	"PULY", // Pull a stack value into register Y
 
 	// output
 	"OUTV", // Send a value to the output register

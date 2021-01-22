@@ -45,76 +45,77 @@ func New(sourceFile string) (*Program, error) {
 	return prg, nil
 }
 
-// Parse
+// Parse parses the source file, performing "lexical analysis"... just a bunch
+// of strings.Split and if statements :)
 func (prg *Program) parse() error {
-	// Read source file.
+	// Read source file and split into lines.
 	bytes, err := ioutil.ReadFile(prg.sourceFile)
 	if nil != err {
 		return errors.Wrap(err, "could not read source file '%s'", prg.sourceFile)
 	}
-
-	// Split source file into lines
 	prg.Lines = strings.Split(string(bytes), "\n")
 
-	// "lex" code
+	// Inspect each line, tokenizing instructions into program.Instruction{}
+	// structs.
 	for idx, line := range prg.Lines {
 		// Strip comments.
 		p := strings.Split(line, "#")
 		code := strings.TrimRight(p[0], " \t")
 
-		// All whitespace must a single tab.
+		// All whitespace must be a single space.
 		code = strings.ReplaceAll(code, "\t", " ")
 		for strings.Contains(code, "  ") {
 			code = strings.ReplaceAll(code, "  ", " ")
 		}
 		code = strings.ReplaceAll(code, " {", "{")
 
-		// Parse instructions.
+		// Remaining non-blank lines are code instructions.
 		if "" != strings.Trim(code, " \t") {
 			prg.Code[idx] = code
-			prg.Instructions[idx], err = newInstruction(code)
+			prg.Instructions[idx], err = newInstruction(code, idx)
 			if nil != err {
 				return errors.Wrap(err, "failed to parse instruction '%s' at line %d", code, idx+1)
 			}
 
-			//
-			prg.Instructions[idx].Idx = idx
-			prg.Instructions[idx].Line = idx + 1
+			// Program counter index associated with this instruction.
 			prg.Instructions[idx].Inst = len(prg.Instructions) - 1
 
-			// Update token indexes.
+			// Update global instruction indexes.
 			switch prg.Instructions[idx].Type {
 			default:
 				return errors.Wrap(errUnknownInstruction, "instruction type '%s'", prg.Instructions[idx].Type)
 
 			case T_CONST:
-				// Data stored on ROM.
+				// ROM image indexes for $labeled data.
 				datMap[prg.Instructions[idx].Label] = prg.Instructions[idx].Data
 
 			case T_LABEL:
-				// Label for JMP instructions.
+				// indexes for JMP instructions.
 				jmpMap[prg.Instructions[idx].Label] = idx
 
 			case T_INSTR:
-				// Instruction.
+				// instruction statements.
 
 			case T_SUB:
-				// Subroutine.
+				// subroutine label indexes.
 				prg.inSub = true
 				prg.curSub = prg.Instructions[idx].Label
 				subMap[prg.Instructions[idx].Label] = idx
 
 			case T_SUBEND:
-				// Subroutine end.
-				prg.inSub = false
+				// subroutine end label '}' injects code that uses the call stack
+				// to return from a sub, does not need mapping.
 				prg.Instructions[idx].Label = prg.curSub
+				prg.inSub = false
 				prg.curSub = ""
 			}
 		}
 	}
+
 	return nil
 }
 
+// Compile puts all the bits in their places and writes them to a file at `dest`.
 func (prg *Program) Compile(dest string) error {
 	var err error
 
@@ -125,48 +126,101 @@ func (prg *Program) Compile(dest string) error {
 	defer outf.Close()
 
 	bytes := []byte{}
-	for k := range prg.Lines {
-		if inst, ok := prg.Instructions[k]; ok {
-			var instByte byte
+	for idx := range prg.Lines {
+		if inst, ok := prg.Instructions[idx]; ok {
+			var byt byte
 			switch inst.Type {
 			default:
 				return errors.Wrap(errUnknownInstruction, "instruction type '%s'", inst.Type)
 
 			case T_CONST:
 				// Data stored on ROM.
+				// 0x00 [data value]
 				bytes = append(bytes, 0, byte(inst.Data))
 
 			case T_LABEL:
 				// Label for JMP instructions.
-				instByte, err = opCode("LABEL")
-				bytes = append(bytes, instByte, byte(inst.Data))
+				byt, err = opCode("NOP")
+				if nil != err {
+					return errors.Wrap(err, "OPCODE")
+				}
+				// [instruction] [data value]
+				bytes = append(bytes, byt, 0)
 
 			case T_INSTR:
+				switch inst.Label {
 				// Instruction.
-				instByte, err = opCode(inst.Label)
-				if nil != err {
-					log.WithError(err).Debug(err)
+				default:
+					byt, err = opCode(inst.Label)
+					if nil != err {
+						return errors.Wrap(err, "OPCODE")
+					}
+					// [instruction] [data value]
+					bytes = append(bytes, byt, byte(inst.Data))
+					log.WithFields(log.Fields{
+						"inst":   inst.Label,
+						"data":   inst.Data,
+						"opcode": byt,
+					}).Debug("instruction data byte")
+
+				// add current position to stack, jump to postion referenced by
+				// instruction at index `inst.Data`
+				case "RUN":
+					if sub, ok := prg.Instructions[inst.Data]; ok {
+						byt, err = opCode("JMPV")
+						if nil != err {
+							return errors.Wrap(err, "OPCODE")
+						}
+						bytes = append(bytes, byt, byte(sub.Idx))
+					} else {
+						return errors.Wrap(errUnknownSubroutine, "unknown subroutine '%s': %d", inst.Code, inst.Data)
+					}
+
+				case "JMPV":
 				}
-				bytes = append(bytes, instByte, byte(inst.Data))
-				log.WithFields(log.Fields{
-					"inst":   inst.Label,
-					"data":   inst.Data,
-					"opcode": instByte,
-				}).Debug("instruction data byte")
 
 			case T_SUB:
-				// Subroutine.
-				bytes = append(bytes, 0, 0)
+				// Subroutine, implicit jump to subroutine label.
+				//	* Push current program counter value onto stack
+				//	* Jump to subroutine header index
+				//
+				// JMP [subroutine instruction postion]
+
+				// push idx+1 into stack
+				byt, err = opCode("PSHV")
+				if nil != err {
+					log.WithError(err).Debug(err)
+					return errors.Wrap(err, "OPCODE")
+				}
+				bytes = append(bytes, byt, byte(inst.Idx+1))
+
+				// jump to the subroutine index
+				byt, err = opCode("JMP")
+				if nil != err {
+					return errors.Wrap(err, "OPCODE")
+				}
+				bytes = append(bytes, byt, byte(inst.Data))
 
 			case T_SUBEND:
-				// Subroutine end.
-				bytes = append(bytes, 0, 0)
+				// Subroutine end, implicit return from subroutine instruction block.
+				//	* Pop last program value off of stack
+				//	* Jump to program counter value
+				//
+				// JMP [program counter value]
+
+				// load the last stack value into the program counter register
+				byt, err = opCode("JMPS")
+				if nil != err {
+					log.WithError(err).Debug(err)
+					return errors.Wrap(err, "OPCODE")
+				}
+				bytes = append(bytes, byt, byte(inst.Idx+1))
 			}
 			if nil != err {
 				return err
 			}
 
-			log.Debugf("compiled instruction %d: % -10s %02x:%02x\n", inst.Inst, `"`+strings.Trim(inst.Code, " ")+`"`, instByte, inst.Data)
+			log.Debugf("compiled instruction %d: % -10s %02x:%02x\n", inst.Inst, `"`+strings.Trim(inst.Code, " ")+`"`, byt, inst.Data)
 		}
 	}
 	log.Infof("compiled code size is %d bytes", len(bytes))

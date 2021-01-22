@@ -5,6 +5,9 @@ import "github.com/bdlm/errors/v2"
 type instructionType string
 
 const (
+	// Unknown syntax
+	T_UNK instructionType = "unknown"
+
 	// Data stored on ROM
 	T_CONST instructionType = "const"
 
@@ -29,6 +32,7 @@ const (
 
 var (
 	errUnknownInstruction = errors.Errorf("unknown instruction type")
+	errUnknownSubroutine  = errors.Errorf("unknown subroutine")
 	errSyntaxError        = errors.Errorf("invalid syntax")
 	errParseError         = errors.Errorf("unknown")
 	errCompileError       = errors.Errorf("unknown")
