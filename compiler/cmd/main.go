@@ -43,7 +43,7 @@ func main() {
 
 	// DEBUG
 	code := ""
-	for inst := range prg.Instructions() {
+	for _, inst := range prg.Instructions() {
 		code = code + "\n" + inst.Line()
 	}
 	fmt.Printf("\n%s\n\n", code)
