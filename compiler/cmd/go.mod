@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/bdlm/log/v2 v2.0.3
-	github.com/mkenney/8bit-cpu/compiler/pkg v0.0.0-20210118233019-84f1ef6c4e3b
+	github.com/mkenney/8bit-cpu/cmp2/pkg v0.0.0-00010101000000-000000000000
 )
 
-replace github.com/mkenney/8bit-cpu/compiler/pkg => ../pkg
+replace github.com/mkenney/8bit-cpu/cmp2/pkg => ../pkg

@@ -2,10 +2,9 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
-	"github.com/mkenney/8bit-cpu/compiler/pkg/program"
+	"github.com/mkenney/8bit-cpu/cmp2/pkg/bcc"
 
 	"github.com/bdlm/log/v2"
 )
@@ -17,30 +16,37 @@ func init() {
 
 func main() {
 	var err error
-	logger := log.WithField("src", os.Args[1])
+	sourceFile := os.Args[1]
+	destFile := os.Args[2]
 
-	logger.Info("parsing...")
-	prg, err := program.New(os.Args[1])
+	logger := log.WithFields(log.Fields{"src": os.Args[1], "dest": os.Args[2]})
+	logger.Debug("initializing compiler")
+	prg, err := bcc.New(sourceFile, destFile)
 	if nil != err {
-		logger.WithError(err).
-			Fatal("failed to parse source file")
+		logger.WithError(err).Fatal("failed to initialize bit code compiler")
 	}
 
-	dest := os.Args[1] + ".img"
-	logger = logger.WithField("dest", dest)
-	logger.Info("compiling...")
-	err = prg.Compile(dest)
+	logger.Debug("parsing src file")
+	err = prg.Parse()
 	if nil != err {
-		logger.WithError(err).
-			Fatal("failed to compile binary")
+		logger.WithError(err).Fatal("failed to parse source file")
 	}
+
+	logger.Debug("writing dest image")
+	err = prg.Compile()
+	if nil != err {
+		logger.WithError(err).Fatal("failed to compile ROM images")
+	}
+
 	logger.Info("success")
 
-	code := ""
-	for a := range prg.Lines {
-		if l, ok := prg.Code[a]; ok {
-			code = code + "\n" + l
-		}
-	}
-	fmt.Printf("\n%s\n\n", code)
+	// DEBUG
+	//code := ""
+	//for a := range prg.Lines() {
+	//	l := prg.Instructions()[a]
+	//	if l, ok := prg.Instructions()[a]; ok {
+	//		code = code + "\n" + l
+	//	}
+	//}
+	//fmt.Printf("\n%s\n\n", code)
 }
