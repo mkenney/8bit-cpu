@@ -39,6 +39,10 @@ func newInst(ln int, line string) (*instruction, error) {
 	return inst, nil
 }
 
+func (inst *instruction) Line() string {
+	return inst.line
+}
+
 func (inst *instruction) compile() ([]byte, error) {
 	return inst.op.byts, nil
 }

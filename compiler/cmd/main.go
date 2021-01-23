@@ -2,6 +2,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/mkenney/8bit-cpu/cmp2/pkg/bcc"
@@ -41,12 +42,9 @@ func main() {
 	logger.Info("success")
 
 	// DEBUG
-	//code := ""
-	//for a := range prg.Lines() {
-	//	l := prg.Instructions()[a]
-	//	if l, ok := prg.Instructions()[a]; ok {
-	//		code = code + "\n" + l
-	//	}
-	//}
-	//fmt.Printf("\n%s\n\n", code)
+	code := ""
+	for inst := range prg.Instructions() {
+		code = code + "\n" + inst.Line()
+	}
+	fmt.Printf("\n%s\n\n", code)
 }
