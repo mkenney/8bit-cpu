@@ -2,6 +2,7 @@ package program
 
 import (
 	"encoding/binary"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -140,7 +141,7 @@ func (prg *Program) Compile(dest string) error {
 
 			case T_LABEL:
 				// Label for JMP instructions.
-				byt, err = opCode("NOP")
+				byt, err = instructionCode("NOP")
 				if nil != err {
 					return errors.Wrap(err, "OPCODE")
 				}
@@ -151,7 +152,7 @@ func (prg *Program) Compile(dest string) error {
 				switch inst.Label {
 				// Instruction.
 				default:
-					byt, err = opCode(inst.Label)
+					byt, err = instructionCode(inst.Label)
 					if nil != err {
 						return errors.Wrap(err, "OPCODE")
 					}
@@ -167,7 +168,7 @@ func (prg *Program) Compile(dest string) error {
 				// instruction at index `inst.Data`
 				case "RUN":
 					if sub, ok := prg.Instructions[inst.Data]; ok {
-						byt, err = opCode("JMPV")
+						byt, err = instructionCode("JMPV")
 						if nil != err {
 							return errors.Wrap(err, "OPCODE")
 						}
@@ -187,7 +188,7 @@ func (prg *Program) Compile(dest string) error {
 				// JMP [subroutine instruction postion]
 
 				// push idx+1 into stack
-				byt, err = opCode("PSHV")
+				byt, err = instructionCode("PSHV")
 				if nil != err {
 					log.WithError(err).Debug(err)
 					return errors.Wrap(err, "OPCODE")
@@ -195,7 +196,7 @@ func (prg *Program) Compile(dest string) error {
 				bytes = append(bytes, byt, byte(inst.Idx+1))
 
 				// jump to the subroutine index
-				byt, err = opCode("JMP")
+				byt, err = instructionCode("JMP")
 				if nil != err {
 					return errors.Wrap(err, "OPCODE")
 				}
@@ -209,7 +210,7 @@ func (prg *Program) Compile(dest string) error {
 				// JMP [program counter value]
 
 				// load the last stack value into the program counter register
-				byt, err = opCode("JMPS")
+				byt, err = instructionCode("JMPS")
 				if nil != err {
 					log.WithError(err).Debug(err)
 					return errors.Wrap(err, "OPCODE")
@@ -220,15 +221,24 @@ func (prg *Program) Compile(dest string) error {
 				return err
 			}
 
-			log.Debugf("compiled instruction %d: % -10s %02x:%02x\n", inst.Inst, `"`+strings.Trim(inst.Code, " ")+`"`, byt, inst.Data)
+			log.WithFields(log.Fields{
+				"PC id":    inst.Inst,
+				"code":     strings.Trim(inst.Code, " "),
+				"bytecode": fmt.Sprintf("%02x:%02x", byt, inst.Data),
+			}).Debug("compiled instruction")
 		}
 	}
 	log.Infof("compiled code size is %d bytes", len(bytes))
 
-	binSize := Kbit32 - len(bytes)
-	log.Infof("padding ROM image to %d additional bytes (%d total)", binSize, Kbit32)
-	for a := 0; a < binSize; a++ {
-		bytes = append(bytes, 0)
+	paddingSize := Kbit32 - len(bytes)
+	paddingByte := byte(255)
+	log.WithFields(log.Fields{
+		"image size":   Kbit32,
+		"padding":      paddingSize,
+		"padding byte": fmt.Sprintf("%02x", paddingByte),
+	}).Info("padding ROM image")
+	for a := 0; a < paddingSize; a++ {
+		bytes = append(bytes, paddingByte)
 	}
 
 	err = binary.Write(outf, binary.BigEndian, bytes)

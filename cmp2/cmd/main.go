@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mkenney/8bit-cpu/compiler/pkg/program"
+	"github.com/mkenney/8bit-cpu/cmd2/pkg/bcc"
 
 	"github.com/bdlm/log/v2"
 )
@@ -17,23 +17,25 @@ func init() {
 
 func main() {
 	var err error
-	logger := log.WithField("src", os.Args[1])
 
-	logger.Info("parsing...")
-	prg, err := program.New(os.Args[1])
+	sourceFile := os.Args[1]
+	destFile := os.Args[2]
+
+	prg, err := bcc.New(sourceFile, destFile)
 	if nil != err {
-		logger.WithError(err).
-			Fatal("failed to parse source file")
+		logger.WithError(err).Fatal("failed to initialize bit code compiler")
 	}
 
-	dest := os.Args[1] + ".img"
-	logger = logger.WithField("dest", dest)
-	logger.Info("compiling...")
-	err = prg.Compile(dest)
+	prg.Parse()
 	if nil != err {
-		logger.WithError(err).
-			Fatal("failed to compile binary")
+		logger.WithError(err).Fatal("failed to parse source file")
 	}
+
+	err = prg.Compile()
+	if nil != err {
+		logger.WithError(err).Fatal("failed to compile rom images")
+	}
+
 	logger.Info("success")
 
 	code := ""

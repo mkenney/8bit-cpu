@@ -152,6 +152,15 @@ func (inst *Instruction) parseInstruction() error {
 			} else {
 				return errors.Wrap(errCompileError, "unknown label reference '%s' at line %d", parts[1], inst.Line)
 			}
+
+		case "JMPV":
+			if data, ok := datMap[parts[1]]; ok {
+				inst.Data = data
+			} else if byt, err := parseData(parts[1]); nil != err {
+				return errors.Wrap(err, "unknown data reference '%s' at line %d", parts[1], inst.Line)
+			} else {
+				inst.Data = byt
+			}
 		}
 	}
 
@@ -176,6 +185,7 @@ func (inst *Instruction) endSubroutine() error {
 		return errors.Wrap(errSyntaxError, "invalid subroutine return statement '%s' at line %d", inst.Code, inst.Line)
 	}
 	inst.Label = parts[0]
+	inst.Data = 0
 
 	return nil
 }

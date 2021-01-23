@@ -31,6 +31,7 @@ const (
 )
 
 var (
+	errUnknownOperation   = errors.Errorf("unknown operation")
 	errUnknownInstruction = errors.Errorf("unknown instruction type")
 	errUnknownSubroutine  = errors.Errorf("unknown subroutine")
 	errSyntaxError        = errors.Errorf("invalid syntax")
